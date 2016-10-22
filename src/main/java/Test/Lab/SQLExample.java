@@ -1,30 +1,36 @@
 package Test.Lab;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class SQLExample {
 
     private static final String DB_DRIVER = "org.h2.Driver";
     private static final String DB_CONNECTION = "jdbc:h2:mem:secure;DB_CLOSE_DELAY=-1";
     private static final String DB_USER = "";
-    private static final String DB_PASSWORD = "";
+    //private static final String DB_PASSWORD;
 
     private static final String TEST_USER = "HelloSecure";
     private static final String TEST_PASS = "1234";
     
     
-    private Connection getDBConnection() throws ClassNotFoundException, SQLException {
+    private Connection getDBConnection() throws ClassNotFoundException, SQLException, FileNotFoundException {
         Class.forName(DB_DRIVER);
-        Connection dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, DB_PASSWORD);
+        File f=new File("pwd.txt");
+        Scanner sc=new Scanner(f);
+        Connection dbConnection = DriverManager.getConnection(DB_CONNECTION, DB_USER, sc.next());
+        sc.close();
         return dbConnection;
     }
 
-    private void createTable() throws SQLException, ClassNotFoundException {
+    private void createTable() throws SQLException, ClassNotFoundException, FileNotFoundException {
         Connection conn = getDBConnection();
         Statement stmt = conn.createStatement();
         stmt.execute("CREATE TABLE USER(userName varchar(255), password varchar(255))");    
@@ -33,7 +39,7 @@ public class SQLExample {
         conn.close();
     }
     
-    private void addUser() throws ClassNotFoundException, SQLException {
+    private void addUser() throws ClassNotFoundException, SQLException, FileNotFoundException {
         Connection conn = getDBConnection();
         Statement stmt = conn.createStatement();
         stmt.execute("INSERT INTO USER(userName, password) VALUES ('"+TEST_USER+"', '"+TEST_PASS+"')");        
@@ -42,7 +48,7 @@ public class SQLExample {
         conn.close();
     }
     
-    private boolean isValidUser(String userName, String pass) throws ClassNotFoundException, SQLException {
+    private boolean isValidUser(String userName, String pass) throws ClassNotFoundException, SQLException, FileNotFoundException {
         Connection conn = getDBConnection();
         PreparedStatement stmt = conn.prepareStatement("SELECT * FROM USER WHERE userName=? AND password=?");
         stmt.setString(1, userName);
@@ -59,7 +65,7 @@ public class SQLExample {
         return valid;
     }
 
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
+    public static void main(String[] args) throws ClassNotFoundException, SQLException, FileNotFoundException {
         SQLExample example = new SQLExample();
         example.createTable();
         example.addUser();
